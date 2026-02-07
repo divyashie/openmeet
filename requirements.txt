@@ -1,0 +1,6 @@
+rumps==0.4.0
+pyaudio==0.2.13
+sounddevice==0.4.6
+numpy==1.24.3
+requests==2.31.0
+python-dotenv==1.0.0

@@ -1,0 +1,133 @@
+# 🎙️ OpenMeet
+
+Open-source macOS menu bar app for real-time meeting transcription and AI-powered summaries.
+
+## Features
+
+- 🎤 Real-time transcription during meetings
+- 📝 Automatic meeting summaries with action items
+- 🔒 100% local processing (privacy-first)
+- 🆓 Completely free and open source
+- ⚡ Works with Zoom, Google Meet, Teams, Slack
+
+## Tech Stack
+
+- **Language:** Python 3.10+
+- **Speech-to-Text:** Whisper.cpp (local)
+- **Summarization:** Ollama (local LLM)
+- **UI:** Rumps (menu bar) + Tkinter (windows)
+
+## Status
+
+🚧 **In Development** - Basic functionality working, UI in progress
+
+## Installation
+
+### Prerequisites
+- macOS 12.0+
+- Python 3.10+
+- 8GB RAM minimum (16GB recommended)
+
+### Quick Setup
+```bash
+# Clone repository
+git clone https://github.com/YOUR_USERNAME/openmeet.git
+cd openmeet
+
+# Run setup script
+./setup.sh
+```
+
+## Manual Setup
+```bash
+# 1. Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# 2. Install Python dependencies
+pip install -r requirements.txt
+
+# 3. Install and build Whisper.cpp
+git clone https://github.com/ggerganov/whisper.cpp.git
+cd whisper.cpp
+mkdir build && cd build
+cmake ..
+cmake --build . --config Release
+cd ..
+bash ./models/download-ggml-model.sh tiny
+cd ..
+
+# 4. Install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+ollama pull llama3.2:3b
+
+# 5. Validate setup
+python src/utils/config.py
+```
+
+## Usage
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Run application
+python src/app.py
+```
+
+Then:
+1. Click the 🎙️ icon in your menu bar
+2. Select "Start Recording"
+3. Join your meeting
+4. Click "Stop Recording" when done
+5. Get instant summary with action items
+
+## Development
+
+Currently implemented:
+- ✅ Menu bar app
+- ✅ Audio capture
+- ✅ Real-time transcription
+- 🚧 Transcript window UI
+- 🚧 Summary generation
+- 🚧 Storage and export
+
+Coming soon:
+- [ ] Settings panel
+- [ ] Speaker diarization
+- [ ] Custom prompts for summaries
+- [ ] Export to multiple formats
+- [ ] .app bundle packaging
+
+## Privacy
+
+All processing happens locally on your Mac:
+- ✅ No cloud uploads
+- ✅ No API calls to external services
+- ✅ Your data never leaves your computer
+- ✅ No telemetry or tracking
+
+## Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Acknowledgments
+
+- [Whisper.cpp](https://github.com/ggerganov/whisper.cpp) - Fast local transcription
+- [Ollama](https://ollama.ai) - Local LLM inference
+- [Rumps](https://github.com/jaredks/rumps) - macOS menu bar interface
+
+## Support
+
+Found a bug? Have a feature request? [Open an issue](https://github.com/YOUR_USERNAME/openmeet/issues)
+
+---
+
+Built with ❤️ for privacy-conscious professionals
