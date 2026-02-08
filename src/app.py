@@ -18,6 +18,12 @@ from summarizer import Summarizer
 
 logger = logging.getLogger(__name__)
 
+# Icon Constants
+ASSETS_DIR = Path(__file__).parent / "assets"
+ICON_DEFAULT = str(ASSETS_DIR / "openmeet_menu.png")
+ICON_RECORDING = str(ASSETS_DIR / "openmeet_meeting.png")
+ICON_PROCESSING = str(ASSETS_DIR / "openmeet_speechbubble.png")
+
 
 class OpenMeetApp(rumps.App):
     """Main menu bar application"""
@@ -34,7 +40,8 @@ class OpenMeetApp(rumps.App):
 
         super().__init__(
             name="OpenMeet",
-            icon=None,
+            icon=ICON_DEFAULT,
+            template=False,
             quit_button=None
         )
 
@@ -87,7 +94,7 @@ class OpenMeetApp(rumps.App):
         self.menu["Stop Recording"].set_callback(None)
         self.menu["Show Transcript"].set_callback(None)
 
-        self.title = "🎙️"
+        self.title = ""
 
         logger.info("OpenMeet initialized!")
 
@@ -116,7 +123,8 @@ class OpenMeetApp(rumps.App):
         self.full_transcript = []
 
         # Update UI
-        self.title = "🔴"
+        self.icon = ICON_RECORDING
+        self.title = ""
         self.menu["Start Recording"].set_callback(None)
         self.menu["Stop Recording"].set_callback(self.stop_recording)
         self.menu["Show Transcript"].set_callback(self.show_transcript)
@@ -163,6 +171,7 @@ class OpenMeetApp(rumps.App):
             ok="Generate",
             cancel="Skip Summary"
         )
+        format_window.icon = ICON_DEFAULT
         format_response = format_window.run()
 
         format_map = {"1": "detailed", "2": "bullets", "3": "executive", "4": "email"}
@@ -172,7 +181,8 @@ class OpenMeetApp(rumps.App):
             chosen_format = None  # Skip summary
 
         # Update UI
-        self.title = "⏳"
+        self.icon = ICON_PROCESSING
+        self.title = ""
         self.menu["Start Recording"].set_callback(self.start_recording)
         self.menu["Stop Recording"].set_callback(None)
 
@@ -267,7 +277,8 @@ class OpenMeetApp(rumps.App):
             else:
                 logger.error("Failed to save audio")
 
-            self.title = "🎙️"
+            self.icon = ICON_DEFAULT
+            self.title = ""
             logger.info("=" * 50)
 
         threading.Thread(target=process_recording, daemon=True).start()
@@ -350,6 +361,7 @@ class OpenMeetApp(rumps.App):
             ok="Next",
             cancel="Close"
         )
+        window.icon = ICON_DEFAULT
         response = window.run()
 
         if response.clicked:
@@ -363,6 +375,7 @@ class OpenMeetApp(rumps.App):
                 message="Choose model size:\n  tiny / base / small / medium",
                 default_text=settings.get("whisper_model")
             )
+            window.icon = ICON_DEFAULT
             resp = window.run()
             if resp.clicked and resp.text.strip() in ("tiny", "base", "small", "medium"):
                 settings.set("whisper_model", resp.text.strip())
@@ -375,6 +388,7 @@ class OpenMeetApp(rumps.App):
                 message="Enter language code:\n  en / fr / es / de / ja / zh / etc.",
                 default_text=settings.get("language")
             )
+            window.icon = ICON_DEFAULT
             resp = window.run()
             if resp.clicked and resp.text.strip():
                 settings.set("language", resp.text.strip())
@@ -387,6 +401,7 @@ class OpenMeetApp(rumps.App):
                 message="Choose format:\n  detailed / bullets / executive / email",
                 default_text=settings.get("summary_format")
             )
+            window.icon = ICON_DEFAULT
             resp = window.run()
             if resp.clicked and resp.text.strip() in ("detailed", "bullets", "executive", "email"):
                 settings.set("summary_format", resp.text.strip())
