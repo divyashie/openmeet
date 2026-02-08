@@ -47,7 +47,7 @@ class TestTranscriptionPipeline:
 class TestSummarizationPipeline:
     """Test transcript -> summary flow"""
 
-    def test_transcript_to_summary(self, mock_ollama, sample_transcript):
+    def test_transcript_to_summary(self, mock_llm, sample_transcript):
         from summarizer import Summarizer
         s = Summarizer()
 
@@ -56,7 +56,7 @@ class TestSummarizationPipeline:
         assert len(summary) > 0
         assert "Meeting Summary" in summary
 
-    def test_all_summary_formats_work(self, mock_ollama, sample_transcript):
+    def test_all_summary_formats_work(self, mock_llm, sample_transcript):
         from summarizer import Summarizer, SUMMARY_FORMATS
         s = Summarizer()
 
@@ -102,7 +102,7 @@ class TestFullPipeline:
     """Test complete audio -> transcript -> summary flow"""
 
     def test_end_to_end_with_mocks(
-        self, mock_pyaudio, mock_whisper_paths, mock_ollama, sample_transcript
+        self, mock_pyaudio, mock_whisper_paths, mock_llm, sample_transcript
     ):
         model, exe = mock_whisper_paths
 
@@ -140,7 +140,7 @@ class TestFullPipeline:
             assert "Meeting Summary" in summary
 
     def test_empty_recording_produces_placeholder(
-        self, mock_pyaudio, mock_whisper_paths, mock_ollama
+        self, mock_pyaudio, mock_whisper_paths, mock_llm
     ):
         model, exe = mock_whisper_paths
 

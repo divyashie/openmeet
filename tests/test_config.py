@@ -9,10 +9,10 @@ from pathlib import Path
 class TestConfigPaths:
     """Test path constants"""
 
-    def test_project_root_is_valid_directory(self):
-        from utils.config import PROJECT_ROOT
-        assert PROJECT_ROOT.exists()
-        assert PROJECT_ROOT.is_dir()
+    def test_resources_dir_is_valid_directory(self):
+        from utils.config import RESOURCES_DIR
+        assert RESOURCES_DIR.exists()
+        assert RESOURCES_DIR.is_dir()
 
     def test_transcripts_dir_exists(self):
         from utils.config import TRANSCRIPTS_DIR

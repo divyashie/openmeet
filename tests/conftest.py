@@ -51,16 +51,25 @@ def mock_whisper_paths(tmp_path):
 
 
 @pytest.fixture
-def mock_ollama():
-    """Mock Ollama API responses"""
-    with patch("requests.get") as mock_get, \
-         patch("requests.post") as mock_post:
-        mock_get.return_value = MagicMock(status_code=200)
-        mock_post.return_value = MagicMock(
-            status_code=200,
-            json=lambda: {"response": "# Meeting Summary\n\n## Overview\nTest summary content."}
-        )
-        yield mock_get, mock_post
+def mock_llm(tmp_path):
+    """Mock llama-cpp-python for summarizer tests"""
+    # Create a fake model file so path.exists() passes
+    fake_model = tmp_path / "fake_model.gguf"
+    fake_model.write_text("fake")
+
+    mock_llama_instance = MagicMock()
+    mock_llama_instance.return_value = {
+        'choices': [{'text': '# Meeting Summary\n\n## Overview\nTest summary content.'}]
+    }
+
+    mock_llama_class = MagicMock(return_value=mock_llama_instance)
+
+    mock_module = MagicMock()
+    mock_module.Llama = mock_llama_class
+
+    with patch.dict('sys.modules', {'llama_cpp': mock_module}), \
+         patch('summarizer.LLM_MODEL_PATH', fake_model):
+        yield mock_llama_instance
 
 
 @pytest.fixture

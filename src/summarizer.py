@@ -1,11 +1,10 @@
 """
-AI-powered meeting summarization using Ollama
+AI-powered meeting summarization using local LLM (llama-cpp-python)
 """
-import requests
 from datetime import datetime
 import logging
 
-from utils.config import OLLAMA_API_URL, OLLAMA_MODEL
+from utils.config import LLM_MODEL_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -13,22 +12,25 @@ SUMMARY_FORMATS = ("detailed", "bullets", "executive", "email")
 
 
 class Summarizer:
-    """Generate meeting summaries using local LLM (Ollama)"""
+    """Generate meeting summaries using a bundled local LLM"""
 
-    def __init__(self, model=OLLAMA_MODEL, summary_format="detailed"):
-        self.model = model
-        self.api_url = OLLAMA_API_URL
+    def __init__(self, summary_format="detailed"):
         self.summary_format = summary_format
+        self.model_path = LLM_MODEL_PATH
 
-        try:
-            response = requests.get("http://localhost:11434/api/tags", timeout=2)
-            if response.status_code == 200:
-                logger.info("Summarizer initialized (model: %s)", self.model)
-            else:
-                logger.warning("Ollama responded with status %d", response.status_code)
-        except Exception:
-            logger.error("Ollama is not running! Start it with: ollama serve")
-            raise ConnectionError("Ollama is not running")
+        if not self.model_path.exists():
+            logger.error("LLM model not found at %s", self.model_path)
+            raise RuntimeError(f"LLM model not found: {self.model_path}")
+
+        from llama_cpp import Llama
+        logger.info("Loading LLM model: %s", self.model_path.name)
+        self.llm = Llama(
+            model_path=str(self.model_path),
+            n_ctx=2048,
+            n_threads=4,
+            verbose=False,
+        )
+        logger.info("Summarizer initialized")
 
     def generate_summary(self, transcript, meeting_duration_minutes=None, fmt=None):
         """
@@ -37,7 +39,7 @@ class Summarizer:
         Args:
             transcript: Full meeting transcript text
             meeting_duration_minutes: Optional meeting duration
-            fmt: Summary format (detailed/bullets/executive/email). Falls back to self.summary_format.
+            fmt: Summary format (detailed/bullets/executive/email)
 
         Returns:
             Formatted summary as markdown string
@@ -48,10 +50,10 @@ class Summarizer:
         fmt = fmt or self.summary_format
         prompt = self._build_summary_prompt(transcript, meeting_duration_minutes, fmt)
 
-        logger.info("Generating %s summary (%d chars, model: %s)", fmt, len(transcript), self.model)
+        logger.info("Generating %s summary (%d chars)", fmt, len(transcript))
 
         try:
-            response = self._call_ollama(prompt)
+            response = self._call_llm(prompt)
 
             if response:
                 logger.info("Summary generated successfully")
@@ -215,77 +217,36 @@ Best regards,
 
 RULES: Keep it professional and concise. Only include information from the transcript. Use a warm but professional tone."""
 
-    def _call_ollama(self, prompt, max_retries=3):
-        """Call Ollama API with retry logic."""
-        payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "stream": False,
-            "options": {
-                "temperature": 0.1,
-                "top_p": 0.85,
-                "num_predict": 1000
-            }
-        }
+    def _call_llm(self, prompt):
+        """Call the local LLM model."""
+        logger.info("Calling local LLM...")
 
-        for attempt in range(max_retries):
-            try:
-                logger.info("Calling Ollama (attempt %d/%d)...", attempt + 1, max_retries)
+        response = self.llm(
+            prompt,
+            max_tokens=1000,
+            temperature=0.1,
+            top_p=0.85,
+            echo=False,
+        )
 
-                response = requests.post(
-                    self.api_url,
-                    json=payload,
-                    timeout=120
-                )
+        # Defensively validate response structure
+        if not isinstance(response, dict):
+            logger.error("LLM response is not a dict: %s", type(response))
+            logger.error("Raw response: %s", response)
+            return None
 
-                if response.status_code == 200:
-                    result = response.json()
-                    return result.get('response', '').strip()
-                else:
-                    logger.warning("Ollama returned status %d", response.status_code)
+        if 'choices' not in response or not isinstance(response['choices'], list) or len(response['choices']) == 0:
+            logger.error("LLM response missing or invalid 'choices' key: %s", response)
+            return None
 
-            except requests.exceptions.Timeout:
-                logger.warning("Request timed out")
+        choice = response['choices'][0]
+        if not isinstance(choice, dict) or 'text' not in choice:
+            logger.error("LLM choice[0] missing or invalid 'text' key: %s", choice)
+            return None
 
-            except Exception as e:
-                logger.error("Ollama error: %s", e)
+        text = choice['text'].strip()
+        if not isinstance(text, str) or not text:
+            logger.error("LLM text is not a non-empty string: %s", text)
+            return None
 
-            if attempt < max_retries - 1:
-                logger.info("Retrying...")
-
-        return None
-
-
-if __name__ == "__main__":
-    from utils.logger import setup_logger
-    setup_logger("openmeet", level="DEBUG")
-
-    print("Testing Summarizer\n")
-
-    try:
-        summarizer = Summarizer()
-    except ConnectionError as e:
-        print(f"\n{e}")
-        print("\nPlease start Ollama:")
-        print("  ollama serve")
-        exit(1)
-
-    sample_transcript = """
-    [10:00:23] Thanks everyone for joining today's standup. Let's go around and share updates.
-    [10:00:45] Sarah here. I finished the authentication module yesterday. It's ready for code review.
-    [10:01:23] I've been working on the database optimization. Should be done by end of day.
-    [10:02:05] Let's deploy to staging on Friday afternoon.
-    [10:03:00] Yes I'll take care of it. I'll send a deploy checklist to the team by Wednesday.
-    [10:03:25] Great. Thanks everyone. Let's sync again tomorrow same time.
-    """
-
-    print("Sample Transcript:")
-    print("="*60)
-    print(sample_transcript[:200] + "...")
-    print("="*60 + "\n")
-
-    for fmt in SUMMARY_FORMATS:
-        print(f"\n--- {fmt.upper()} FORMAT ---")
-        summary = summarizer.generate_summary(sample_transcript, meeting_duration_minutes=3, fmt=fmt)
-        print(summary)
-        print("="*60)
+        return text
