@@ -1,0 +1,4 @@
+ Hi Team. Thanks for joining today's meeting. Let me share some of the dates first.
+ First, the new feature is almost complete. Sara can you finish the API integration by Friday?
+ Second, we need to decide on the deployment date. I think we should deploy to staging on Monday.
+ Any questions or blockers? Great. Let's think again tomorrow. Thanks everyone.

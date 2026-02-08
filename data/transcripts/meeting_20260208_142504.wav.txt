@@ -1,0 +1,5 @@
+ The current state of sandbagging detection is fragmented.
+ Researchers are testing individual methods in isolation.
+ What we are proposing is fundamentally different.
+ The first adversarial robust evaluation framework that assumes models will actively try to
+ evade detection.

@@ -1,0 +1,7 @@
+Meeting Transcript
+============================================================
+
+[11:22:46] Hi team, thanks for joining today's meeting, let me share some updates first. you feature in...
+[11:22:56] almost complete. Sarah, can you finish the API integration by Friday. Second, we can now this side on the deployment date. I think.
+[11:23:06] should deploy to staging on Monday. Any questions or blockers? Great. Let's think again tomorrow. Thanks everyone.
+[11:23:12] [BLANK_AUDIO]
