@@ -1,0 +1,11 @@
+Meeting Transcript
+============================================================
+
+[13:53:23] good morning everyone thanks for joining today's standup let's start with project
+[13:53:33] of dates Sarah how's the dashboard coming along. Hi the dashboard is about 80% done. I finished the charts yesterday.
+[13:53:43] and I'm working on the filters today. I should have it ready for review by Thursday. Great progress, any blockers? Actually,
+[13:53:53] So yes, I need access to the production database to test the real data. Can someone help me with that? I'll send you the credentials.
+[13:54:03] of the skull mic, what about the IAPI integration? The API is done and I deployed to stage ring, I run into
+[13:54:13] a park with the authentication flow, but I fixed it this morning. I'll write the documentation today. Perfect. So the decision is, will aim?
+[13:54:23] For a demo on Friday, may can you provide the staging environment and Sarah please have the dashboard ready by Thursday.
+[13:54:33] so that we can do a dry run. Any questions? No. Great. Let's think again tomorrow. Thanks everyone.

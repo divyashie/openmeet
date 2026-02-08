@@ -1,0 +1,21 @@
+ Good morning everyone, thanks for joining today's standup.
+ Let's start with project updates.
+ Sarah, how's the dashboard coming along?
+ Hi, the dashboard is about 80% done.
+ I finished the charts yesterday and I'm working on the filters today.
+ I should have it ready for review by Thursday.
+ Every progress any blockers, actually yes, I need access to the production database
+ to test with real data, can someone help me with that?
+ I'll send you the credentials of the school mic, what about the IPI integration?
+ The API is done and I deploy to staging.
+ I run into a bug with the authentication flow, but I fix it this morning.
+ I'll write the documentation today.
+ Perfect.
+ So the decision is, will aim for a demo on Friday?
+ My, can you provide the staging environment?
+ And Sarah, please have the dashboard ready by Thursday so that we can do a dry run.
+ Any questions?
+ No.
+ Great.
+ Let's think again tomorrow.
+ Thanks everyone.
