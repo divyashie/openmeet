@@ -28,6 +28,8 @@ build/
 # Project specific
 data/transcripts/*.md
 data/transcripts/*.wav
+data/transcripts/*.wav.txt
+data/transcripts/*.txt
 logs/*.log
 *.wav
 *.mp3
