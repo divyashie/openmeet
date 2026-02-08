@@ -1,0 +1,4 @@
+ Hi Team, thanks for joining today's meeting. Let me share some updates. First, the new
+ feature is almost complete. Sarah, can you finish the API integration by Friday?
+ Second, we can now decide on the deployment date. I think we should deploy to
+ stay during on Monday. Any questions or blockers? Great. Let's think again tomorrow. Thanks, everyone.
