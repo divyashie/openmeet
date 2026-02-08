@@ -42,3 +42,8 @@ whisper.cpp/
 .pytest_cache/
 .coverage
 htmlcov/
+models/*.gguf
+
+# Models (too large - download separately)
+models/*.gguf
+whisper.cpp/models/*.bin

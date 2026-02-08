@@ -1,18 +1,48 @@
 """
 Configuration management for OpenMeet
 """
-import requests
+import sys
+import os
 from pathlib import Path
 from utils.settings import Settings
 from utils.logger import setup_logger, get_logger
 
-# Project paths
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-SRC_DIR = PROJECT_ROOT / "src"
-DATA_DIR = PROJECT_ROOT / "data"
+
+def is_frozen():
+    """Check if running inside a bundled .app (PyInstaller or py2app)."""
+    return getattr(sys, 'frozen', False)
+
+
+def get_resources_dir():
+    """Return the directory containing read-only bundled resources."""
+    if is_frozen():
+        # PyInstaller stores resources in sys._MEIPASS
+        # py2app uses RESOURCEPATH env var
+        return Path(getattr(sys, '_MEIPASS', os.environ.get(
+            'RESOURCEPATH',
+            str(Path(sys.executable).parent.parent / 'Resources')
+        )))
+    return Path(__file__).parent.parent.parent
+
+
+def get_app_data_dir():
+    """Return a writable directory for user data."""
+    if is_frozen():
+        d = Path.home() / "Library" / "Application Support" / "OpenMeet"
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+    return Path(__file__).parent.parent.parent
+
+
+# Directories — read-only resources vs writable user data
+RESOURCES_DIR = get_resources_dir()
+APP_DATA_DIR = get_app_data_dir()
+
+SRC_DIR = RESOURCES_DIR / "src" if not is_frozen() else RESOURCES_DIR
+DATA_DIR = APP_DATA_DIR / "data"
 TRANSCRIPTS_DIR = DATA_DIR / "transcripts"
-LOGS_DIR = PROJECT_ROOT / "logs"
-WHISPER_DIR = PROJECT_ROOT / "whisper.cpp"
+LOGS_DIR = APP_DATA_DIR / "logs"
+WHISPER_DIR = RESOURCES_DIR / "whisper.cpp"
 
 # Create directories if they don't exist
 TRANSCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -36,9 +66,9 @@ CHANNELS = 1  # Mono
 CHUNK_SIZE = 1024
 CHUNK_DURATION = 10  # seconds
 
-# Ollama settings
-OLLAMA_API_URL = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = settings.get("ollama_model")
+# LLM settings (bundled model) - only construct path if model name is configured
+llm_model_name = settings.get("llm_model")
+LLM_MODEL_PATH = RESOURCES_DIR / "models" / llm_model_name if llm_model_name else None
 
 # UI settings
 TRANSCRIPT_WINDOW_WIDTH = 500
@@ -60,12 +90,12 @@ def validate_setup():
         errors.append(f"Whisper executable not found at {WHISPER_EXECUTABLE}")
         errors.append("  Run: cd whisper.cpp && mkdir build && cd build && cmake .. && cmake --build . --config Release")
 
-    try:
-        response = requests.get("http://localhost:11434/api/tags", timeout=2)
-        if response.status_code != 200:
-            errors.append("Ollama is not responding")
-    except Exception:
-        errors.append("Ollama is not running. Start it with: ollama serve")
+    if LLM_MODEL_PATH is None:
+        errors.append("LLM model not configured (llm_model is missing from settings)")
+        errors.append("  Configure llm_model in settings or set OPENMEET_LLM_MODEL environment variable")
+    elif not LLM_MODEL_PATH.exists():
+        errors.append(f"LLM model not found at {LLM_MODEL_PATH}")
+        errors.append(f"  Download a GGUF model into the models/ directory")
 
     if errors:
         logger.error("Setup validation failed:")

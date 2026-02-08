@@ -4,12 +4,14 @@ Real-time meeting transcription and AI summaries
 """
 import rumps
 import sys
+import os
 from pathlib import Path
 import threading
 from datetime import datetime
 import logging
 
-sys.path.insert(0, str(Path(__file__).parent))
+if not getattr(sys, 'frozen', False):
+    sys.path.insert(0, str(Path(__file__).parent))
 
 from utils.config import validate_setup, settings
 from audio_capture import AudioCapture
@@ -20,6 +22,19 @@ logger = logging.getLogger(__name__)
 
 # Icon Constants
 ASSETS_DIR = Path(__file__).parent / "assets"
+ICON_DEFAULT = str(ASSETS_DIR / "openmeet_menu.png")
+ICON_RECORDING = str(ASSETS_DIR / "openmeet_meeting.png")
+ICON_PROCESSING = str(ASSETS_DIR / "openmeet_speechbubble.png")
+
+
+# Icon Constants — bundle-aware
+def _get_assets_dir():
+    if getattr(sys, 'frozen', False):
+        return Path(getattr(sys, '_MEIPASS', os.environ.get('RESOURCEPATH', '.'))) / "assets"
+    return Path(__file__).parent / "assets"
+
+
+ASSETS_DIR = _get_assets_dir()
 ICON_DEFAULT = str(ASSETS_DIR / "openmeet_menu.png")
 ICON_RECORDING = str(ASSETS_DIR / "openmeet_meeting.png")
 ICON_PROCESSING = str(ASSETS_DIR / "openmeet_speechbubble.png")
@@ -61,8 +76,8 @@ class OpenMeetApp(rumps.App):
         # Summarizer
         try:
             self.summarizer = Summarizer()
-        except ConnectionError:
-            logger.warning("Summarizer not available (Ollama not running)")
+        except RuntimeError:
+            logger.warning("Summarizer not available (model not found)")
             self.summarizer = None
 
         # Diarizer (lazy, only if enabled)
@@ -267,7 +282,7 @@ class OpenMeetApp(rumps.App):
                     if not chosen_format:
                         logger.info("Summary skipped by user")
                     else:
-                        logger.warning("Summary not generated (Ollama not available)")
+                        logger.warning("Summary not generated (model not available)")
 
                     rumps.notification(
                         title="OpenMeet",
