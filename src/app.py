@@ -20,12 +20,6 @@ from summarizer import Summarizer
 
 logger = logging.getLogger(__name__)
 
-# Icon Constants
-ASSETS_DIR = Path(__file__).parent / "assets"
-ICON_DEFAULT = str(ASSETS_DIR / "openmeet_menu.png")
-ICON_RECORDING = str(ASSETS_DIR / "openmeet_meeting.png")
-ICON_PROCESSING = str(ASSETS_DIR / "openmeet_speechbubble.png")
-
 
 # Icon Constants — bundle-aware
 def _get_assets_dir():
