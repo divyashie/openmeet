@@ -9,6 +9,8 @@ a = Analysis(
     pathex=['src'],
     binaries=[
         ('whisper.cpp/build/bin/whisper-cli', 'whisper.cpp/build/bin'),
+        # Include llama-cpp-python shared libraries
+        ('venv/lib/python3.13/site-packages/llama_cpp/lib', 'llama_cpp/lib'),
     ],
     datas=[
         ('src/assets/*.png', 'assets'),
